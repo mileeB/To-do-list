@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do List</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .todo-container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        width: 400px; /* Increased width */
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    form {
+        display: flex;
+        margin-bottom: 10px;
+    }
+
+    input[type="text"] {
+        flex: 1;
+        padding: 8px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 3px 0 0 3px;
+    }
+
+    button {
+        padding: 8px 15px;
+        background-color: #4CAF50;
+        color: #fff;
+        border: none;
+        border-radius: 0 3px 3px 0;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    .btn-danger {
+        background-color: #f44336;
+    }
+
+    .btn-danger:hover {
+        background-color: #dc3545;
+    }
+
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    li {
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #f2f2f2;
+        border-radius: 3px;
+        display: flex;
+        justify-content: space-between;
+        word-break: break-word; /* Ensures long words wrap to next line */
+    }
+
+    li.completed {
+        text-decoration: line-through;
+    }
+
+    li button {
+        background-color: #f44336;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<div class="todo-container">
+    <h1>To-Do List</h1>
+    <form id="todoForm">
+        <input type="text" id="taskInput" placeholder="Enter task..." required>
+        <button type="submit">Add Task</button>
+    </form>
+    <ul id="taskList"></ul>
+    <button class="btn btn-danger" onclick="clearAllTasks()">Clear All</button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadTasks();
+        
+        document.getElementById('todoForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            var taskInput = document.getElementById('taskInput');
+            var task = taskInput.value.trim();
+            
+            if (task === '') {
+                alert('Please enter a task.');
+                return;
+            }
+            
+            addTask(task);
+            taskInput.value = '';
+        });
+    });
+
+    function addTask(task) {
+        var taskList = document.getElementById('taskList');
+        
+        var li = document.createElement('li');
+        li.textContent = task;
+        
+        var deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', function() {
+            li.remove();
+            saveTasks();
+        });
+        
+        var completeButton = document.createElement('button');
+        completeButton.textContent = 'Complete';
+        completeButton.addEventListener('click', function() {
+            li.classList.toggle('completed');
+            saveTasks();
+        });
+        
+        // Check if buttons already exist in the li element
+        var existingButtons = li.getElementsByTagName('button');
+        if (existingButtons.length === 0) {
+            li.appendChild(completeButton);
+            li.appendChild(deleteButton);
+        }
+        
+        taskList.appendChild(li);
+        
+        saveTasks();
+    }
+
+    function saveTasks() {
+        var tasks = [];
+        var taskElements = document.querySelectorAll('#taskList li');
+        
+        taskElements.forEach(function(taskElement) {
+            var task = {
+                text: taskElement.textContent,
+                completed: taskElement.classList.contains('completed')
+            };
+            tasks.push(task);
+        });
+        
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function loadTasks() {
+        var tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        
+        tasks.forEach(function(task) {
+            addTask(task.text);
+            if (task.completed) {
+                var li = document.querySelector('#taskList li:last-child');
+                li.classList.add('completed');
+            }
+        });
+    }
+
+    function clearAllTasks() {
+        var taskList = document.getElementById('taskList');
+        taskList.innerHTML = ''; // Clear all tasks from the DOM
+        
+        // Clear tasks from localStorage
+        localStorage.removeItem('tasks');
+    }
+</script>
+
+</body>
+</html>
